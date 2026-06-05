@@ -1,0 +1,35 @@
+================================================
+  Nextworld2 - Kristaly Auto-Klikker
+  Hasznalati utmutato
+================================================
+
+ELSO HASZNALAT ELOTT:
+---------------------
+1. Telepitsd a Pythont (ha meg nincs fent):
+   https://www.python.org/downloads/
+   FONTOS: pipald be az "Add Python to PATH" opciот!
+
+2. Keszits egy kepet a kristályrol:
+   - Nyomj Print Screen-t vagy hasznalj Snipping Tool-t
+   - Vagd ki CSAK a kristalyt (minnel kevesebb hatter)
+   - Mentsd el "crystal.png" nevvel EBBE a mappaba
+
+HASZNALAT:
+----------
+- Duplán kattints az INDIT.bat filera
+- A program automatikusan megkeresi a kristalyt
+  a kepernyon es rákattint
+- Leallitas: Ctrl+C  (vagy huzd az egeret a sarokba)
+
+BEALLITASOK (crystal_clicker.py megnyitasaval):
+------------------------------------------------
+- CONFIDENCE = 0.8  → ha nem talalja, probald 0.6-ra csokkenteni
+- CLICK_DELAY = 0.5 → kattintasok kozott ennyi masodpercet var
+- LOOP = True       → False-ra allitva csak egyszer kattint
+
+PROBLEMAK:
+----------
+- "Nem talalom a kristalyt" → keszits pontosabb/kisebb kepet,
+  vagy csokkentsd a CONFIDENCE erteket
+- "Python nincs telepitve" → telepitsd a fenti linkrol
+================================================
