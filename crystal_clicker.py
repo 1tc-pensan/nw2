@@ -38,11 +38,8 @@ def find_and_click(image_path, confidence=0.8):
         pyautogui.click()
         print(f"✓ Legközelebbi kristály ({len(locations)} db közül): ({center.x}, {center.y})")
         return True
-    except pyautogui.ImageNotFoundException:
+    except Exception:
         print("✗ Nem találtam kristályt a képernyőn...")
-        return False
-    except Exception as e:
-        print(f"Hiba: {e}")
         return False
 
 
