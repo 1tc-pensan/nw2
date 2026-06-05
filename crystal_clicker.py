@@ -56,27 +56,37 @@ def find_and_click(target_r, target_g, target_b, tolerance, min_pixels, zone=Non
         (np.abs(img[:, :, 2].astype(int) - target_b) <= tolerance)
     )
 
-    ys, xs = np.where(mask)
-
-    if len(xs) < min_pixels:
-        print(f"Nem talaltam kristalyt ({len(xs)} egyezo pixel, minimum: {min_pixels})")
+    if mask.sum() < min_pixels:
+        print(f"Nem talaltam kristalyt ({mask.sum()} egyezo pixel, minimum: {min_pixels})")
         return False
 
-    # Legközelebbi pixel a cursorhoz
-    cursor_x, cursor_y = pyautogui.position()
-    abs_xs = xs + offset_x
-    abs_ys = ys + offset_y
-    distances = np.sqrt((abs_xs - cursor_x) ** 2 + (abs_ys - cursor_y) ** 2)
-    nearest_idx = np.argmin(distances)
+    # Grid-alapu cluster kereses: 30x30 pixeles cellakra osztjuk a kepet
+    # Minden cella ahol eleg sok egyezo pixel van = egy kristaly
+    CELL = 30
+    h, w = img.shape[:2]
+    clusters = []
+    for gy in range(0, h, CELL):
+        for gx in range(0, w, CELL):
+            count = mask[gy:gy+CELL, gx:gx+CELL].sum()
+            if count >= 8:
+                cx = gx + CELL // 2 + offset_x
+                cy = gy + CELL // 2 + offset_y
+                clusters.append((cx, cy, int(count)))
 
-    click_x = int(abs_xs[nearest_idx])
-    click_y = int(abs_ys[nearest_idx])
+    if not clusters:
+        print("Nem talaltam kristaly-csoportot")
+        return False
+
+    # Legközelebbi cluster közepe a cursorhoz
+    cursor_x, cursor_y = pyautogui.position()
+    closest = min(clusters, key=lambda c: (c[0] - cursor_x) ** 2 + (c[1] - cursor_y) ** 2)
+    click_x, click_y = closest[0], closest[1]
 
     pyautogui.moveTo(click_x, click_y, duration=0.3)
     time.sleep(0.15)
     pyautogui.click(button='left')
     time.sleep(0.1)
-    print(f"Kattintottam: ({click_x}, {click_y})  |  {len(xs)} egyezo pixel")
+    print(f"Kattintottam: ({click_x}, {click_y})  |  {len(clusters)} kristaly-csoport talalva")
     return True
 
 
