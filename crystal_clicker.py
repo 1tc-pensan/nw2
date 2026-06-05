@@ -17,8 +17,9 @@ from PIL import ImageGrab
 # ============================================================
 
 COLOR_FILE   = "color.json"   # a szinkod fajl neve
+ZONE_FILE    = "zone.json"    # a zona fajl neve (opcionalis)
 TOLERANCE    = 30             # szintoleranacia (0-255, minnel nagyobb annál több szint fogad el)
-CLICK_DELAY  = 2.0            # varakozas kattintasok kozott (masodperc)
+CLICK_DELAY  = 5.0            # varakozas kattintasok kozott (masodperc)
 MIN_PIXELS   = 30             # legalabb ennyi egyezo pixel kell hogy kattintson
 LOOP         = True
 
@@ -29,8 +30,23 @@ def load_color(color_file):
     return data["r"], data["g"], data["b"]
 
 
-def find_and_click(target_r, target_g, target_b, tolerance, min_pixels):
-    screenshot = ImageGrab.grab()
+def load_zone(zone_file):
+    if not os.path.exists(zone_file):
+        return None
+    with open(zone_file, "r") as f:
+        z = json.load(f)
+    return z["x1"], z["y1"], z["x2"], z["y2"]
+
+
+def find_and_click(target_r, target_g, target_b, tolerance, min_pixels, zone=None):
+    if zone:
+        x1, y1, x2, y2 = zone
+        screenshot = ImageGrab.grab(bbox=(x1, y1, x2, y2))
+        offset_x, offset_y = x1, y1
+    else:
+        screenshot = ImageGrab.grab()
+        offset_x, offset_y = 0, 0
+
     img = np.array(screenshot)
 
     # Szin egyezes keresese toleranciaval
@@ -46,19 +62,21 @@ def find_and_click(target_r, target_g, target_b, tolerance, min_pixels):
         print(f"Nem talaltam kristalyt ({len(xs)} egyezo pixel, minimum: {min_pixels})")
         return False
 
-    # Legközelebbi pixel cluster kozeppontja
+    # Legközelebbi pixel a cursorhoz
     cursor_x, cursor_y = pyautogui.position()
-    distances = np.sqrt((xs - cursor_x) ** 2 + (ys - cursor_y) ** 2)
+    abs_xs = xs + offset_x
+    abs_ys = ys + offset_y
+    distances = np.sqrt((abs_xs - cursor_x) ** 2 + (abs_ys - cursor_y) ** 2)
     nearest_idx = np.argmin(distances)
 
-    click_x = int(xs[nearest_idx])
-    click_y = int(ys[nearest_idx])
+    click_x = int(abs_xs[nearest_idx])
+    click_y = int(abs_ys[nearest_idx])
 
     pyautogui.moveTo(click_x, click_y, duration=0.3)
     time.sleep(0.15)
     pyautogui.click(button='left')
     time.sleep(0.1)
-    print(f"Kattintottam: ({click_x}, {click_y})  |  {len(xs)} egyezo pixel talalhato")
+    print(f"Kattintottam: ({click_x}, {click_y})  |  {len(xs)} egyezo pixel")
     return True
 
 
@@ -74,11 +92,18 @@ def main():
 
     target_r, target_g, target_b = load_color(color_path)
 
+    zone_path = os.path.join(script_dir, ZONE_FILE)
+    zone = load_zone(zone_path)
+
     print("=" * 50)
     print("  Nextworld2 Kristaly Auto-Klikker (szin alapu)")
     print("=" * 50)
     print(f"Cel szin: R={target_r}  G={target_g}  B={target_b}")
     print(f"Tolerancia: +/-{TOLERANCE}")
+    if zone:
+        print(f"Zona: ({zone[0]}, {zone[1]}) -> ({zone[2]}, {zone[3]})")
+    else:
+        print("Zona: nincs beallitva (egesz kepernyo)")
     print("Leallitas: Ctrl+C  |  Veszjel: egeret sarokba")
     print("=" * 50)
     print()
@@ -95,10 +120,10 @@ def main():
         if LOOP:
             print("Folyamatos kereses modban futok...\n")
             while True:
-                find_and_click(target_r, target_g, target_b, TOLERANCE, MIN_PIXELS)
+                find_and_click(target_r, target_g, target_b, TOLERANCE, MIN_PIXELS, zone)
                 time.sleep(CLICK_DELAY)
         else:
-            find_and_click(target_r, target_g, target_b, TOLERANCE, MIN_PIXELS)
+            find_and_click(target_r, target_g, target_b, TOLERANCE, MIN_PIXELS, zone)
     except KeyboardInterrupt:
         print("\nLeallitva.")
 
