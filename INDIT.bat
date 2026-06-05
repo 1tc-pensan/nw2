@@ -44,8 +44,20 @@ if not exist "%~dp0crystal.png" (
 )
 
 echo [OK] crystal.png megtalalhato
+echo.echo Mit szeretnel?
+echo   1 - Kristaly keprogzito inditasa (uj crystal.png keszitese)
+echo   2 - Auto-klikker inditasa
 echo.
-echo Indul a program... (Leallitas: Ctrl+C)
+set /p valasz="Valassz (1 vagy 2): "
+
+if "%valasz%"=="1" (
+    echo.
+    echo Indul a keprogzito...
+    python "%~dp0keprogzito.py"
+    goto :eof
+)
+
+echo.echo Indul a program... (Leallitas: Ctrl+C)
 echo.
 
 :: Szkript futtatása
