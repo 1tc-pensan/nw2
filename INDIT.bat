@@ -1,8 +1,16 @@
 @echo off
 title Kristaly Auto-Klikker
 
+:: Admin jog ellenorzese - ha nem admin, ujraindit admin jogokkal
+net session >nul 2>&1
+if errorlevel 1 (
+    echo Admin jog szukseges, ujrainditom...
+    powershell -Command "Start-Process '%~f0' -Verb RunAs"
+    exit /b
+)
+
 echo ================================================
-echo   Nextworld2 - Kristaly Auto-Klikker
+echo   Nextworld2 - Kristaly Auto-Klikker (ADMIN)
 echo ================================================
 echo.
 
@@ -23,7 +31,7 @@ echo.
 
 :: Fuggosegek telepitese
 echo Fuggosegek ellenorzese / telepitese...
-python -m pip install pyautogui pillow opencv-python --quiet --disable-pip-version-check
+python -m pip install pyautogui pillow opencv-python numpy --quiet --disable-pip-version-check
 if errorlevel 1 (
     echo [HIBA] Nem sikerult a csomagokat telepiteni!
     pause

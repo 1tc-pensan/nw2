@@ -1,83 +1,93 @@
 import tkinter as tk
 from PIL import ImageGrab
+import json
 import os
-import sys
+import time
 
 # ============================================================
-#  Kristaly keprogzito
+#  Kristaly szinkod-szedo
 #  Hasznalat:
-#    1. Indítsd el ezt a szkriptet
+#    1. Inditsd el ezt a szkriptet
 #    2. Valtj at a jatekra (3 masodperc mulva jon az ablak)
-#    3. Huzd be a kristaly kore a téglalapot
-#    4. Keszul a crystal.png
+#    3. Kattints ra a kristályra
+#    4. Menti a szint a color.json fajlba
 # ============================================================
 
-OUTPUT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "crystal.png")
+OUTPUT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "color.json")
 DELAY_SEC = 3
 
 
-class ScreenCapture:
-    def __init__(self):
+class ColorPicker:
+    def __init__(self, screenshot):
+        self.screenshot = screenshot
         self.root = tk.Tk()
         self.root.attributes("-fullscreen", True)
-        self.root.attributes("-alpha", 0.3)
+        self.root.attributes("-alpha", 0.01)  # majdnem teljesen atlatszo
         self.root.attributes("-topmost", True)
         self.root.configure(bg="black")
-        self.root.title("Jelold ki a kristalyt")
+        self.root.title("Kattints a kristályra!")
+        self.root.config(cursor="crosshair")
 
-        self.canvas = tk.Canvas(self.root, cursor="cross", bg="black", highlightthickness=0)
-        self.canvas.pack(fill=tk.BOTH, expand=True)
-
-        label = tk.Label(
-            self.root,
-            text="Huzd be a kristaly kore a negyzetett, majd engedd el!  (ESC = kilepes)",
-            font=("Arial", 16, "bold"),
-            fg="white",
-            bg="black"
-        )
-        label.place(relx=0.5, rely=0.05, anchor="center")
-
-        self.start_x = self.start_y = 0
-        self.rect = None
-
-        self.canvas.bind("<ButtonPress-1>", self.on_press)
-        self.canvas.bind("<B1-Motion>", self.on_drag)
-        self.canvas.bind("<ButtonRelease-1>", self.on_release)
+        self.root.bind("<ButtonPress-1>", self.on_click)
         self.root.bind("<Escape>", lambda e: self.root.destroy())
+        self.root.bind("<Motion>", self.on_move)
 
-    def on_press(self, event):
-        self.start_x = event.x
-        self.start_y = event.y
-        if self.rect:
-            self.canvas.delete(self.rect)
-        self.rect = self.canvas.create_rectangle(
-            self.start_x, self.start_y, self.start_x, self.start_y,
-            outline="red", width=2
+        # info ablak
+        self.info = tk.Label(
+            self.root,
+            text="Kattints a kristályra!  (ESC = kilepes)",
+            font=("Arial", 14, "bold"),
+            fg="white", bg="#222222",
+            padx=10, pady=6
         )
+        self.info.place(relx=0.5, rely=0.03, anchor="center")
 
-    def on_drag(self, event):
-        self.canvas.coords(self.rect, self.start_x, self.start_y, event.x, event.y)
+        self.color_label = tk.Label(
+            self.root,
+            text="",
+            font=("Arial", 12),
+            fg="white", bg="#222222",
+            padx=10, pady=4
+        )
+        self.color_label.place(relx=0.5, rely=0.09, anchor="center")
 
-    def on_release(self, event):
-        end_x, end_y = event.x, event.y
-        x1 = min(self.start_x, end_x)
-        y1 = min(self.start_y, end_y)
-        x2 = max(self.start_x, end_x)
-        y2 = max(self.start_y, end_y)
+    def on_move(self, event):
+        try:
+            r, g, b = self.screenshot.getpixel((event.x, event.y))
+            self.color_label.config(text=f"Szin: R={r}  G={g}  B={b}   HEX=#{r:02X}{g:02X}{b:02X}")
+        except Exception:
+            pass
 
-        if x2 - x1 < 5 or y2 - y1 < 5:
+    def on_click(self, event):
+        try:
+            r, g, b = self.screenshot.getpixel((event.x, event.y))
+        except Exception:
             return
-
         self.root.destroy()
 
-        img = ImageGrab.grab(bbox=(x1, y1, x2, y2))
-        img.save(OUTPUT_FILE)
-        print(f"Mentve: {OUTPUT_FILE}  ({x2-x1}x{y2-y1} px)")
+        data = {"r": r, "g": g, "b": b, "hex": f"#{r:02X}{g:02X}{b:02X}"}
+        with open(OUTPUT_FILE, "w") as f:
+            json.dump(data, f, indent=2)
+
+        print(f"Kivalasztott szin: R={r}  G={g}  B={b}  HEX=#{r:02X}{g:02X}{b:02X}")
+        print(f"Mentve: {OUTPUT_FILE}")
         input("Kesz! Nyomj Entert a kilepeshez...")
 
 
 def main():
     print("=" * 50)
+    print("  Kristaly szinkod-szedo")
+    print("=" * 50)
+    print(f"Valtj at a jatekra! {DELAY_SEC} masodperc mulva jon a valaszto...")
+    time.sleep(DELAY_SEC)
+
+    screenshot = ImageGrab.grab()
+    app = ColorPicker(screenshot)
+    app.root.mainloop()
+
+
+if __name__ == "__main__":
+    main()
     print("  Kristaly keprogzito")
     print("=" * 50)
     print(f"Valtj at a jatekra! {DELAY_SEC} masodperc mulva jon a kivalaszto ablak...")
