@@ -1,5 +1,4 @@
 @echo off
-chcp 65001 >nul
 title Kristaly Auto-Klikker
 
 echo ================================================
@@ -7,13 +6,13 @@ echo   Nextworld2 - Kristaly Auto-Klikker
 echo ================================================
 echo.
 
-:: Python ellenőrzése
+:: Python ellenorzese
 python --version >nul 2>&1
 if errorlevel 1 (
     echo [HIBA] Python nincs telepitve!
     echo.
     echo Telepitsd innen: https://www.python.org/downloads/
-    echo Fontos: telepitesnel pipald be az "Add Python to PATH" opciот!
+    echo Fontos: pipald be az "Add Python to PATH" opcioth!
     echo.
     pause
     exit /b 1
@@ -22,7 +21,7 @@ if errorlevel 1 (
 echo [OK] Python megtalalhato
 echo.
 
-:: Függőségek telepítése
+:: Fuggosegek telepitese
 echo Fuggosegek ellenorzese / telepitese...
 python -m pip install pyautogui pillow opencv-python --quiet --disable-pip-version-check
 if errorlevel 1 (
@@ -33,7 +32,7 @@ if errorlevel 1 (
 echo [OK] Fuggosegek rendben
 echo.
 
-:: crystal.png ellenőrzése
+:: crystal.png ellenorzese
 if not exist "%~dp0crystal.png" (
     echo [HIBA] Nem talalom a crystal.png fajlt!
     echo.
@@ -46,7 +45,7 @@ if not exist "%~dp0crystal.png" (
 
 echo [OK] crystal.png megtalalhato
 echo.
-echo Indul a program... ^(Leallitas: Ctrl+C^)
+echo Indul a program... (Leallitas: Ctrl+C)
 echo.
 
 :: Szkript futtatása
