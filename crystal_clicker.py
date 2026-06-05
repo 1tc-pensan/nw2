@@ -21,9 +21,9 @@ LOOP         = True             # True = folyamatosan keres, False = csak egysze
 def find_and_click(image_path, confidence=0.8):
     """Megkeresi az összes kristályt és a cursorhoz legközelebb lévőre kattint."""
     try:
-        locations = list(pyautogui.locateAllOnScreen(image_path, confidence=confidence))
+        locations = list(pyautogui.locateAllOnScreen(image_path, confidence=confidence, grayscale=True))
         if not locations:
-            print("✗ Nem találtam kristályt a képernyőn...")
+            print("Nem talaltam kristalyt a kepernyon...")
             return False
 
         cursor_x, cursor_y = pyautogui.position()
@@ -35,11 +35,13 @@ def find_and_click(image_path, confidence=0.8):
         closest = min(locations, key=distance)
         center = pyautogui.center(closest)
         pyautogui.moveTo(center.x, center.y, duration=0.3)
+        time.sleep(0.15)
         pyautogui.click()
-        print(f"✓ Legközelebbi kristály ({len(locations)} db közül): ({center.x}, {center.y})")
+        time.sleep(0.1)
+        print(f"Kattintottam ({len(locations)} talalat kozul a legkozelebbit): ({center.x}, {center.y})")
         return True
     except Exception:
-        print("✗ Nem találtam kristályt a képernyőn...")
+        print("Nem talaltam kristalyt a kepernyon...")
         return False
 
 
