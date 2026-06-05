@@ -13,7 +13,7 @@ import os
 # ============================================================
 
 CRYSTAL_IMAGE = "crystal.png"   # a kép neve
-CONFIDENCE   = 0.8              # egyezés szintje (0.0 - 1.0)
+CONFIDENCE   = 0.4              # egyezés szintje (0.0 - 1.0)
 CLICK_DELAY  = 4.0              # várakozás kattintások között (másodperc)
 LOOP         = True             # True = folyamatosan keres, False = csak egyszer
 
